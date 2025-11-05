@@ -55,6 +55,12 @@ public class PlayerPlatformerController : MonoBehaviour
             jumpRequested = true;
         }
 
+        if (Input.GetButtonDown("Fire1"))
+        {
+            // Send the "Attack" signal to the Animator
+            animator.SetTrigger("Attack");
+        }
+
         // --- 2. Flip Player Sprite ---
         // This flips the character's facing direction
         if (horizontalInput > 0f) // Moving Right

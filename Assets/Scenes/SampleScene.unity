@@ -155,8 +155,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86a17563e221e714a90506e92631ade6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 7
-  jumpForce: 14
+  moveSpeed: 5
+  jumpForce: 5
   groundCheckPoint: {fileID: 1215046601}
   groundLayer:
     serializedVersion: 2
@@ -209,7 +209,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!212 &436462859
 SpriteRenderer:
   m_ObjectHideFlags: 0
