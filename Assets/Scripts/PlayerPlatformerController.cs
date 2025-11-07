@@ -10,6 +10,7 @@ public class PlayerPlatformerController : MonoBehaviour
 public Collider2D hitboxCollider;
     [Header("Movement Settings")]
     public float moveSpeed = 7f;
+    private bool isAttacking = false;
     public float jumpForce = 14f;
 
     [Header("Ground Check Settings")]
@@ -65,13 +66,16 @@ public Collider2D hitboxCollider;
 
         // --- 2. Flip Player Sprite ---
         // This flips the character's facing direction
-        if (horizontalInput > 0f) // Moving Right
+        if (!isAttacking)
         {
-            transform.localScale = new Vector3(1, 1, 1); 
-        }
-        else if (horizontalInput < 0f) // Moving Left
-        {
-            transform.localScale = new Vector3(-1, 1, 1); // Flips the X-axis
+            if (horizontalInput > 0f) // Moving Right
+            {
+                transform.localScale = new Vector3(1, 1, 1);
+            }
+            else if (horizontalInput < 0f) // Moving Left
+            {
+                transform.localScale = new Vector3(-1, 1, 1); // Flips the X-axis
+            }
         }
 
         // --- 3. Send Data to the Animator ---
@@ -100,8 +104,17 @@ public Collider2D hitboxCollider;
         // We set 'x' based on our input and moveSpeed.
         // We *must* keep the current 'y' velocity (rb.velocity.y),
         // otherwise gravity and jumping will break.
-        rb.velocity = new Vector2(horizontalInput * moveSpeed, rb.velocity.y);
-
+// --- 2. Handle Movement ---
+if (isAttacking)
+{
+    // If we are attacking, stop all horizontal movement
+    rb.velocity = new Vector2(0, rb.velocity.y);
+}
+else
+{
+    // If we are not attacking, move normally
+    rb.velocity = new Vector2(horizontalInput * moveSpeed, rb.velocity.y);
+}
         // --- 3. Handle Jump ---
         if (jumpRequested && isGrounded)
         {
@@ -123,20 +136,30 @@ public Collider2D hitboxCollider;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
     }
-    
+
     public void EnableHitbox()
-{
-    if (hitboxCollider != null)
     {
-        hitboxCollider.enabled = true;
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.enabled = true;
+        }
     }
+
+public void AttackLock()
+{
+    isAttacking = true;
 }
 
-public void DisableHitbox()
+public void AttackUnlock()
 {
-    if (hitboxCollider != null)
-    {
-        hitboxCollider.enabled = false;
-    }
+    isAttacking = false;
 }
+
+    public void DisableHitbox()
+    {
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.enabled = false;
+        }
+    }
 }
