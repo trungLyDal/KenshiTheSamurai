@@ -239,4 +239,20 @@ public class EnemyPatrol : MonoBehaviour
             isChasing = true;
         }
     }
+
+    public void DealDamageToPlayer()
+{
+    // This is where you would check for the player overlap and deal damage
+    // Example: Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, playerLayer);
+    // For now, if the player is still in range, deal damage:
+    if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= attackRange)
+    {
+        PlayerHealth playerHealth = playerTransform.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(1); // Call the player's damage function
+            Debug.Log("DAMAGE DEALT on Animation Event frame.");
+        }
+    }
+}
 }
