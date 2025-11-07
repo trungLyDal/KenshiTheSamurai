@@ -3,18 +3,18 @@ using UnityEngine;
 public class EnemyHealth : MonoBehaviour
 {
     public int maxHealth = 3;
-    public float deathAnimationTime = 1f; // How long is the death animation?
+    public float deathAnimationTime = 1f; 
     
     private int currentHealth;
-    private Animator animator; // NEW: A reference to the Animator
-    private bool isDead = false; // NEW: A flag to stop multiple deaths
+    private Animator animator;
+    private Rigidbody2D rb; // <-- ADD THIS LINE
+    private bool isDead = false;
 
     void Start()
     {
         currentHealth = maxHealth;
-        
-        // NEW: Get the Animator component on this enemy
         animator = GetComponent<Animator>(); 
+        rb = GetComponent<Rigidbody2D>(); // <-- ADD THIS LINE
     }
 
     public void TakeDamage(int damage)
@@ -27,39 +27,33 @@ public class EnemyHealth : MonoBehaviour
         currentHealth -= damage;
         Debug.Log("Enemy took damage! Current health: " + currentHealth);
 
-        // This is your new logic
         if (currentHealth <= 0)
         {
             Die();
         }
         else
         {
-            // --- NEW LINE ---
-            // If we didn't die, play the take hit animation
             animator.SetTrigger("TakeHit");
-            // --- END NEW LINE ---
         }
     }
 
     void Die()
     {
-        // NEW: This function is now completely different
-
-        // 1. Set the isDead flag so this can't be called again
         isDead = true;
         Debug.Log("Enemy has been defeated!");
-
-        // 2. Tell the Animator to play the "Death" animation
         animator.SetTrigger("Death");
 
-        // 3. Disable the enemy's collider so it can't be hit anymore
+        // --- THIS IS THE FIX ---
+        // This freezes the enemy in place and disables all physics, including gravity.
+        rb.bodyType = RigidbodyType2D.Static;
+        // --- END FIX ---
+        
+        // Now it's safe to disable the collider
         GetComponent<Collider2D>().enabled = false;
         
-        // (Optional) If you add a movement script, you'd disable it here too
-        // GetComponent<EnemyMovement>().enabled = false;
-
-        // 4. Destroy this enemy GameObject, but *wait* for the animation to finish
-        // The 'deathAnimationTime' should be the length (in seconds) of your death clip
+        // (Optional) Disable the patrol script so it stops thinking
+        // GetComponent<EnemyPatrol>().enabled = false;
+        
         Destroy(gameObject, deathAnimationTime);
     }
 }
