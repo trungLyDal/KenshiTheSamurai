@@ -67,50 +67,62 @@ public class PlayerHealth : MonoBehaviour
     }
 
     void Die()
+{
+    currentHealth = 0;
+    Debug.Log("Game Over! Player died.");
+    
+    // 1. Halt Player Functionality (Crucial Steps)
+    MonoBehaviour movement = GetComponent<MonoBehaviour>(); 
+    if (movement != null) movement.enabled = false; 
+
+    // Stop all Rigidbody movement and freeze the body's position
+    if (rb != null) 
     {
-        currentHealth = 0;
-        Debug.Log("Game Over! Player died.");
-        
-        // 1. Halt Player Functionality (Crucial Steps)
-        // IMPORTANT: Replace 'MonoBehaviour' with the name of your player movement script.
-        MonoBehaviour movement = GetComponent<MonoBehaviour>(); 
-        if (movement != null) movement.enabled = false; 
+        rb.velocity = Vector2.zero;
+        rb.isKinematic = true; // Lock physics
+    }
+    
+    // 2. Trigger the Death Animation
+    if (animator != null)
+    {
+        // Stop isHurt if it's a Bool that was still active (safe practice)
+        // If 'isHurt' is a Trigger, this line is harmless.
+        // animator.SetBool("isHurt", false); 
 
-        // Stop all Rigidbody movement and freeze the body's position
-        if (rb != null) 
-        {
-            rb.velocity = Vector2.zero;
-            rb.isKinematic = true; // NEW: Set to Kinematic to ignore physics forces (gravity, collisions)
-        }
-        
-        // 2. Trigger the Death Animation
-        if (animator != null)
-        {
-            animator.SetBool("isDead", true); 
-        }
-
-        // 3. Initiate Cleanup (waits for animation to play)
-        // We delay disabling the collider to prevent falling through the floor!
-        StartCoroutine(HandleDeathCleanup());
-        
-        // DO NOT disable the collider here (it was in HandleDeathCleanup)
-        // if (mainCollider != null) mainCollider.enabled = false;
+        animator.SetBool("isDead", true); 
     }
 
-    // Coroutine to handle waiting for the animation before scene cleanup
-    IEnumerator HandleDeathCleanup()
+    // ⭐ THE CRITICAL FIX: Wait one frame for the Animator to fully transition.
+    // This prevents the Coroutine from immediately checking the delay timer.
+    StartCoroutine(HandleDeathCleanup());
+}
+
+// Updated Coroutine to include the single-frame wait
+// Coroutine to handle waiting for the animation before scene cleanup
+IEnumerator HandleDeathCleanup()
+{
+    // Wait for the duration of your death animation (1.067s, 1.2s is a safe value)
+    yield return new WaitForSeconds(deathCleanupDelay); 
+    
+    // --- FINAL FIX FOR CUT-OFF ANIMATION ---
+    if (animator != null)
     {
-        // Wait for the duration of your death animation
-        yield return new WaitForSeconds(deathCleanupDelay); 
-        
-        // ONLY NOW, after the animation, disable the collider/Rigidbody
-        if (mainCollider != null) mainCollider.enabled = false;
-        if (rb != null) rb.isKinematic = false; // Reset if you need it later, or leave it off.
-
-        // Final action: Hide player object and/or trigger game over
-        gameObject.SetActive(false); 
+        // 1. Manually turn OFF the isDead parameter. 
+        // This forces the Animator to take the Death -> Exit transition.
+        animator.SetBool("isDead", false);
     }
+    
+    // 2. Wait one final frame for the Animator to process the exit transition.
+    yield return null; 
+    
+    // --- Cleanup ---
+    // ONLY NOW, after the animation exit is complete, disable components and the GameObject.
+    if (mainCollider != null) mainCollider.enabled = false;
+    if (rb != null) rb.isKinematic = false;
 
+    // Final action: Hide player object and/or trigger game over
+    gameObject.SetActive(false); 
+}
     
     // Coroutine for invulnerability
     IEnumerator BecomeTemporarilyInvulnerable()

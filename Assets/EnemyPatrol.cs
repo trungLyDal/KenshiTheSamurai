@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections; // Needed for the Coroutine in TakeHit if you use it later
+using System.Collections; 
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Rigidbody2D))]
@@ -11,9 +11,15 @@ public class EnemyPatrol : MonoBehaviour
     public Transform pointB;
 
     [Header("Combat")]
-    public Collider2D enemyHitboxCollider; // Reference to the enemy's attack trigger
+    public Collider2D enemyHitboxCollider; // Legacy attack trigger (can be replaced by AttackPoint)
     public float attackRange = 1.5f;        // Distance to stop and start attacking
-    public float attackCooldown = 2f;       // Time between attacks
+    public float attackCooldown = 2f;       // Time between attacks (and the duration the enemy pauses)
+    
+    [Header("Damage Event Setup")]
+    public int attackDamage = 1;              // Damage value dealt to the player
+    public LayerMask playerLayer;             // LayerMask for the Player
+    public Transform attackPoint;             // Position where the attack check originates
+    public float attackRadius = 0.5f;         // Radius of the precise attack check
 
     [Header("Movement")]
     public float moveSpeed = 3f;
@@ -21,8 +27,8 @@ public class EnemyPatrol : MonoBehaviour
 
     [Header("AI / Chasing")]
     public Transform playerTransform;
-    public float sightRange = 5f; // NEW: The distance the enemy can 'see' the player
-    public float chaseStopDistance = 10f; // NEW: Distance to stop chasing if player leaves
+    public float sightRange = 5f; 
+    public float chaseStopDistance = 10f;
 
     // --- Private Components & State ---
     private Transform currentTarget;
@@ -30,19 +36,16 @@ public class EnemyPatrol : MonoBehaviour
     private Rigidbody2D rb;
     private float idleTimer = 0f;
     private bool isFacingRight = true;
-
     private bool isChasing = false;
     private float attackTimer = 0f;
     private float moveDirection = 0f;
 
     void Start()
     {
-        // Get required components
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         currentTarget = pointB;
 
-        // Auto-find player if not assigned
         if (playerTransform == null)
         {
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -51,29 +54,25 @@ public class EnemyPatrol : MonoBehaviour
                 playerTransform = playerObject.transform;
             }
         }
-
-        // IMPORTANT: Check Rigidbody2D Body Type in Inspector. It must be Dynamic or Kinematic, NOT Static.
     }
 
     void Update()
     {
-        // 1. Handle attack timer countdown
+        // 1. Handle attack timer countdown (Used for attack frequency and cooldown pause)
         if (attackTimer > 0f)
         {
             attackTimer -= Time.deltaTime;
         }
 
-        // 2. State Check: Sight and Chase Transition
+        // 2. State Check: Sight and Chase Transition (Logic unchanged)
         if (playerTransform != null)
         {
             float distanceToPlayer = Vector2.Distance(transform.position, playerTransform.position);
             
-            // Start Chasing: If player is within sight range
             if (distanceToPlayer <= sightRange)
             {
                 isChasing = true;
             }
-            // Stop Chasing: If player leaves the dedicated stop range
             else if (isChasing && distanceToPlayer > chaseStopDistance)
             {
                 isChasing = false;
@@ -83,19 +82,24 @@ public class EnemyPatrol : MonoBehaviour
         // 3. Handle AI state execution
         if (isChasing && playerTransform != null)
         {
-            // Highest Priority: Attack Check
             float distanceToPlayer = Vector2.Distance(transform.position, playerTransform.position);
             
+            // Priority 1: Attack (Can only start if cooldown is zero)
             if (distanceToPlayer <= attackRange && attackTimer <= 0f)
             {
                 Attack();
-                attackTimer = attackCooldown;
-                RunChaseLogic(true); // Stop movement for attack
+                // Timer will be set in FinishAttack() for better sync, but setting it here is also fine.
+                RunChaseLogic(true); // Stop movement during attack
             }
+            // ⭐ PRIORITY 2: PAUSE/COOLDOWN STATE (Prevents running/pushing)
+            else if (attackTimer > 0f)
+            {
+                RunChaseLogic(true); // Stop movement while on cooldown
+            }
+            // Priority 3: Chase (Move towards player)
             else
             {
-                // Priority 2: Chase Logic
-                RunChaseLogic(false); // Move towards player
+                RunChaseLogic(false); 
             }
         }
         else
@@ -104,28 +108,26 @@ public class EnemyPatrol : MonoBehaviour
             RunPatrolLogic();
         }
 
-        // 4. Handle animations (Set Speed parameter for Run/Idle animations)
-        // Ensure "Speed" parameter is set as a Float in the Animator.
+        // 4. Handle animations 
         animator.SetFloat("Speed", Mathf.Abs(moveDirection));
     }
 
     void FixedUpdate()
     {
-        // FixedUpdate is for applying physics (movement)
-
-        // Only move if not in the middle of an attack animation
+        // Only move if not in the middle of an attack or cooldown
+        // The Attack/Cooldown stop is handled by moveDirection = 0 in Update
+        
         if (animator.GetBool("isAttacking"))
         {
-            // Stop movement during attack
+            // Stop movement during active animation
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
         else
         {
-            // Otherwise, move horizontally based on the AI's current direction.
+            // Apply movement direction calculated in Update
             rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
         }
     }
-
     void RunPatrolLogic()
     {
         if (idleTimer > 0f)
@@ -160,11 +162,11 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
-    void RunChaseLogic(bool isExecutingAttack)
+    void RunChaseLogic(bool isExecutingAttackOrCooldown)
     {
-        idleTimer = 0f; // Stop patrol timer
+        idleTimer = 0f; 
 
-        // 1. Face the player
+        // 1. Face the player (Logic unchanged)
         float directionToPlayer = playerTransform.position.x > transform.position.x ? 1 : -1;
         bool shouldBeFacingRight = directionToPlayer > 0;
         
@@ -173,26 +175,19 @@ public class EnemyPatrol : MonoBehaviour
             Flip(); 
         }
 
-        if (isExecutingAttack)
+        if (isExecutingAttackOrCooldown)
         {
-            moveDirection = 0f; // Stop movement when attacking
+            moveDirection = 0f; // Stop movement when attacking OR in cooldown
         }
         else
         {
-            // Chase: Move towards the player
-            moveDirection = directionToPlayer;
+            moveDirection = directionToPlayer; // Move towards the player
         }
     }
 
     void Attack()
     {
-        Debug.Log("Enemy is attacking!");
-
-        // 1. Set the Bool for the Animator (enables Attack state transition)
-        // Ensure "isAttacking" is a Bool parameter in the Animator.
         animator.SetBool("isAttacking", true);
-
-        // 2. Force stop movement for responsiveness
         rb.velocity = new Vector2(0, rb.velocity.y);
     }
 
@@ -213,11 +208,36 @@ public class EnemyPatrol : MonoBehaviour
     // !!! IMPORTANT: This MUST be called as an Event near the END of your Attack animation clip !!!
     public void FinishAttack()
     {
-        // This is the crucial line to reset the Bool and allow the Animator to leave the Attack state.
         animator.SetBool("isAttacking", false);
-        Debug.Log("Attack finished, isAttacking set to false.");
+        // ⭐ REVISED: Ensure the cooldown timer starts NOW, locking movement until it expires.
+        attackTimer = attackCooldown; 
+        Debug.Log("Attack finished. Starting cooldown.");
     }
     
+    // This function is triggered by an Animation Event at the exact moment of impact.
+    public void DealDamageToPlayer()
+    {
+        if (attackPoint == null)
+        {
+            Debug.LogError("AttackPoint not assigned! Cannot deal damage precisely. Check the Inspector.");
+            return;
+        }
+        
+        Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, playerLayer);
+
+        foreach (Collider2D hit in hitPlayers)
+        {
+            PlayerHealth playerHealth = hit.GetComponent<PlayerHealth>();
+
+            if (playerHealth != null)
+            {
+                // This call triggers the player's 'isHurt' animation
+                playerHealth.TakeDamage(attackDamage);
+                Debug.Log($"Enemy hit {hit.name} for {attackDamage} damage on Animation Event frame.");
+                return; 
+            }
+        }
+    }
     // Hitbox control functions, called from animation events
     public void EnableHitbox()
     {
@@ -240,19 +260,10 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
-    public void DealDamageToPlayer()
-{
-    // This is where you would check for the player overlap and deal damage
-    // Example: Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, playerLayer);
-    // For now, if the player is still in range, deal damage:
-    if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= attackRange)
+private void OnDrawGizmosSelected()
     {
-        PlayerHealth playerHealth = playerTransform.GetComponent<PlayerHealth>();
-        if (playerHealth != null)
-        {
-            playerHealth.TakeDamage(1); // Call the player's damage function
-            Debug.Log("DAMAGE DEALT on Animation Event frame.");
-        }
+        if (attackPoint == null) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
-}
 }
