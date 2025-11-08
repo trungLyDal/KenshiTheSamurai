@@ -8,7 +8,7 @@ public class PlayerPlatformerController : MonoBehaviour
     public float moveSpeed = 7f;
     private bool isAttacking = false;
     public float jumpForce = 14f;
-
+private bool isFacingRight = true;
     public Transform groundCheckPoint;
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.2f;
@@ -44,11 +44,13 @@ public class PlayerPlatformerController : MonoBehaviour
     void Update()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
+        Flip();
         jumpBufferCounter -= Time.deltaTime;
 
         if (Input.GetButtonDown("Jump"))
         {
-jumpBufferCounter = jumpBufferTime;        }
+            jumpBufferCounter = jumpBufferTime;
+        }
 
         if (Input.GetButtonUp("Jump"))
         {
@@ -63,18 +65,25 @@ jumpBufferCounter = jumpBufferTime;        }
             animator.SetTrigger("Attack");
         }
 
-        if (!isAttacking)
+        // Use KeyDown with KeyCode instead of GetButtonDown with the literal string
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            if (horizontalInput > 0f)
+            // Send the "Attack2" signal to the Animator
+            animator.SetTrigger("Attack2");
+            if (!isAttacking)
             {
-                transform.localScale = new Vector3(1, 1, 1);
-            }
-            else if (horizontalInput < 0f)
-            {
-                transform.localScale = new Vector3(-1, 1, 1);
+                if (horizontalInput > 0f)
+                {
+                    transform.localScale = new Vector3(1, 1, 1);
+                }
+                else if (horizontalInput < 0f)
+                {
+                    transform.localScale = new Vector3(-1, 1, 1);
+                }
             }
         }
 
+        // Update animator parameters every frame
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput));
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetBool("isGrounded", isGrounded);
@@ -102,12 +111,12 @@ jumpBufferCounter = jumpBufferTime;        }
             rb.velocity = new Vector2(horizontalInput * moveSpeed, rb.velocity.y);
         }
 
-if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)        {
+        if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
+        {
             rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
             coyoteTimeCounter = 0f;
             jumpBufferCounter = 0f;
         }
-        
     }
 
     private void OnDrawGizmos()
@@ -140,6 +149,22 @@ if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)        {
         if (hitboxCollider != null)
         {
             hitboxCollider.enabled = false;
+        }
+    }
+
+    private void Flip()
+    {
+        // Check if the input is moving left, but we are facing right
+        if (isFacingRight && horizontalInput < 0f)
+        {
+            isFacingRight = false;
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        // Check if the input is moving right, but we are facing left
+        else if (!isFacingRight && horizontalInput > 0f)
+        {
+            isFacingRight = true;
+            transform.localScale = new Vector3(1, 1, 1);
         }
     }
 }

@@ -1,53 +1,74 @@
 using UnityEngine;
 
+[RequireComponent(typeof(SpriteRenderer))]
 public class ParallaxEffect : MonoBehaviour
 {
-    // A reference to the camera we are following
-    public Transform cameraTransform;
-    
-    // How fast the background moves. 0 = stays still, 1 = moves with camera.
-    // A value like 0.3 or 0.5 works well.
-    [Header("Parallax Effect Multiplier")]
-    public float parallaxEffectX = 0.5f;
-    public float parallaxEffectY = 0.5f;
+    [Header("Parallax Settings")]
+    [Tooltip("Speed of the parallax effect on the X-axis. A value of 0 means no parallax, while 1 means full parallax.")]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float parallaxSpeedX = 0.5f; // Speed of the parallax effect for X-axis
 
-    private float startPositionX;
-    private float startPositionY;
-    private float length;
+    [Tooltip("Speed of the parallax effect on the Y-axis. A value of 0 means no parallax, while 1 means full parallax.")]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float parallaxSpeedY = 0.5f; // Speed of the parallax effect for Y-axis
 
-    void Start()
+    [Header("Camera Settings")]
+    [Tooltip("Reference to the camera's transform. If not set, it will use the main camera.")]
+    [SerializeField]
+    private Transform cameraTransform; // Reference to the camera's transform
+
+    private float startPositionX; // Initial X position of the sprite
+    private float startPositionY; // Initial Y position of the sprite
+    private float spriteSizeX; // Width of the sprite
+    private float spriteSizeY; // Height of the sprite
+    private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
+    private Vector3 initialCameraPosition; // Initial position of the camera
+
+    private void Awake()
     {
-        // Get the starting position of this background object
-        startPositionX = transform.position.x;
-        startPositionY = transform.position.y;
-        
-        // Get the horizontal size of the sprite
-        length = GetComponent<SpriteRenderer>().bounds.size.x;
+        // Get the SpriteRenderer component
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    void Update()
+    private void Start()
     {
-        // How far the camera has moved from its starting point
-        float cameraDistX = (cameraTransform.position.x);
-        float cameraDistY = (cameraTransform.position.y);
+        // If no camera is assigned, use the main camera
+        if (cameraTransform == null)
+            cameraTransform = Camera.main.transform;
 
-        // Calculate the new position for the background
-        float newPosX = startPositionX + (cameraDistX * parallaxEffectX);
-        float newPosY = startPositionY + (cameraDistY * parallaxEffectY);
+        // Store the initial position of the sprite
+        startPositionX = transform.position.x;
+        startPositionY = transform.position.y;
 
-        // Set the new position
-        transform.position = new Vector3(newPosX, newPosY, transform.position.z);
+        // Store the initial camera position
+        initialCameraPosition = cameraTransform.position;
 
-        // --- This part handles the infinite repeating ---
-        float temp = (cameraTransform.position.x * (1 - parallaxEffectX));
-        
-        if (temp > startPositionX + length) 
-        {
-            startPositionX += length;
-        }
-        else if (temp < startPositionX - length)
-        {
-            startPositionX -= length;
-        }
+        // Calculate the width and height of the sprite
+        spriteSizeX = spriteRenderer.bounds.size.x;
+        spriteSizeY = spriteRenderer.bounds.size.y;
+    }
+
+    private void LateUpdate()
+    {
+        // Calculate how far the camera has moved from its initial position
+        float cameraDeltaX = cameraTransform.position.x - initialCameraPosition.x;
+        float cameraDeltaY = cameraTransform.position.y - initialCameraPosition.y;
+
+        // Calculate the parallax offset for the sprite
+        float parallaxOffsetX = cameraDeltaX * parallaxSpeedX;
+        float parallaxOffsetY = cameraDeltaY * parallaxSpeedY;
+
+        // Update the sprite's position
+        transform.position = new Vector3(startPositionX + parallaxOffsetX, startPositionY + parallaxOffsetY, transform.position.z);
+
+        // Loop the parallax effect for X-axis (infinite scrolling)
+        float relativeCameraDistX = cameraDeltaX * (1 - parallaxSpeedX);
+        if (relativeCameraDistX > startPositionX + spriteSizeX)
+            startPositionX += spriteSizeX;
+        else if (relativeCameraDistX < startPositionX - spriteSizeX)
+            startPositionX -= spriteSizeX;
+
     }
 }

@@ -42,6 +42,12 @@ TagManager:
   - name: DistantBackground
     uniqueID: 3327973827
     locked: 0
+  - name: Semi Distant
+    uniqueID: 734879545
+    locked: 0
+  - name: Trees
+    uniqueID: 761691493
+    locked: 0
   - name: Background
     uniqueID: 2491640915
     locked: 0
