@@ -2287,6 +2287,26 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
+  - first: {x: 29, y: -21, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 62
+      m_TileSpriteIndex: 13
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 30, y: -21, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 61
+      m_TileSpriteIndex: 6
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
   - first: {x: 35, y: -21, z: 0}
     second:
       serializedVersion: 2
@@ -4451,10 +4471,10 @@ Tilemap:
     m_Data: {fileID: 0}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: 11400000, guid: 4d855324c5eafb14d9838aef72ba7a01, type: 2}
+  - m_RefCount: 1
+    m_Data: {fileID: 11400000, guid: fc0fc8ca572f67d439b934605551757a, type: 2}
   - m_RefCount: 1
     m_Data: {fileID: 11400000, guid: 4c930f736684ad04486bf7f7d94127b0, type: 2}
   - m_RefCount: 1
@@ -4500,8 +4520,8 @@ Tilemap:
     m_Data: {fileID: 0}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: 21300004, guid: 6f9abc8f092972e4596a62b9d031f99e, type: 3}
   - m_RefCount: 6
     m_Data: {fileID: 21300368, guid: 61504cea38d7bfc41aa06c634949b575, type: 3}
   - m_RefCount: 6
@@ -4514,8 +4534,8 @@ Tilemap:
     m_Data: {fileID: 21300360, guid: 61504cea38d7bfc41aa06c634949b575, type: 3}
   - m_RefCount: 22
     m_Data: {fileID: 21300358, guid: 61504cea38d7bfc41aa06c634949b575, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: 21300002, guid: 6f9abc8f092972e4596a62b9d031f99e, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 21300730, guid: c8ec4d8b444a24f4ba2889543ef0f232, type: 3}
   - m_RefCount: 1
@@ -4647,7 +4667,7 @@ Tilemap:
   - m_RefCount: 2
     m_Data: {fileID: 21300662, guid: 61504cea38d7bfc41aa06c634949b575, type: 3}
   m_TileMatrixArray:
-  - m_RefCount: 298
+  - m_RefCount: 300
     m_Data:
       e00: 1
       e01: 0
@@ -4666,7 +4686,7 @@ Tilemap:
       e32: 0
       e33: 1
   m_TileColorArray:
-  - m_RefCount: 298
+  - m_RefCount: 300
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
@@ -4763,6 +4783,16 @@ CompositeCollider2D:
         Y: -430000000
       - X: 290000000
         Y: -430000000
+      - X: 290000000
+        Y: -210000000
+      - X: 306249984
+        Y: -210000000
+      - X: 310000000
+        Y: -206875008
+      - X: 310000000
+        Y: -200000000
+      - X: 290000000
+        Y: -200000000
       - X: 290000000
         Y: -50000000
       - X: -60000000
@@ -4865,9 +4895,20 @@ CompositeCollider2D:
       - {x: 36.999973, y: 3}
       - {x: -5, y: 2.999971}
       - {x: -4.999971, y: -1}
+    - - {x: 59.99997, y: -37}
+      - {x: 59.99997, y: -36}
+      - {x: 36, y: -35.999973}
+      - {x: 35.999973, y: -5}
+      - {x: 35, y: -5.000029}
+      - {x: 35.00003, y: -37}
     - - {x: 58.99997, y: -44}
       - {x: 58.99997, y: -43}
       - {x: 29, y: -42.999973}
+      - {x: 29.000029, y: -21}
+      - {x: 30.625006, y: -20.999994}
+      - {x: 31, y: -20.687489}
+      - {x: 30.999971, y: -20}
+      - {x: 29, y: -19.999971}
       - {x: 28.999971, y: -5}
       - {x: -6, y: -5.000029}
       - {x: -6.0000296, y: -5.125}
@@ -4913,12 +4954,6 @@ CompositeCollider2D:
       - {x: -4.9999704, y: -6}
       - {x: 28, y: -6.0000296}
       - {x: 28.000029, y: -44}
-    - - {x: 59.99997, y: -37}
-      - {x: 59.99997, y: -36}
-      - {x: 36, y: -35.999973}
-      - {x: 35.999973, y: -5}
-      - {x: 35, y: -5.000029}
-      - {x: 35.00003, y: -37}
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.00005
   m_UseDelaunayMesh: 0
@@ -5883,6 +5918,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 5
   deathAnimationTime: 1
+  isDead: 0
 --- !u!95 &1114393197
 Animator:
   serializedVersion: 5
@@ -6640,6 +6676,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 5
   deathAnimationTime: 1
+  isDead: 0
 --- !u!61 &1325031176
 BoxCollider2D:
   m_ObjectHideFlags: 0
