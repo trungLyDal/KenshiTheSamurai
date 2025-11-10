@@ -3,6 +3,7 @@ using System.Collections;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(EnemyHealth))]
 public class EnemyPatrol : MonoBehaviour
 {
     // Inspector Variables for Setup and Tuning
@@ -27,8 +28,11 @@ public class EnemyPatrol : MonoBehaviour
 
     [Header("AI / Chasing")]
     public Transform playerTransform;
-    public float sightRange = 5f; 
+    public float sightRange = 5f;
     public float chaseStopDistance = 10f;
+    private EnemyHealth health;
+
+    
 
     // --- Private Components & State ---
     private Transform currentTarget;
@@ -44,6 +48,7 @@ public class EnemyPatrol : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        health = GetComponent<EnemyHealth>();
         currentTarget = pointB;
 
         if (playerTransform == null)
@@ -58,6 +63,13 @@ public class EnemyPatrol : MonoBehaviour
 
     void Update()
     {
+
+          if (health != null && health.isDead)
+        {
+            // Stop all movement immediately if dead
+            moveDirection = 0f; 
+            return; 
+        }
         // 1. Handle attack timer countdown (Used for attack frequency and cooldown pause)
         if (attackTimer > 0f)
         {
@@ -115,6 +127,12 @@ public class EnemyPatrol : MonoBehaviour
     {
         // Only move if not in the middle of an attack or cooldown
         // The Attack/Cooldown stop is handled by moveDirection = 0 in Update
+
+         if (health != null && health.isDead)
+        {
+            rb.velocity = new Vector2(0, 0); // Ensure velocity is zeroed
+            return;
+        }
         
         if (animator.GetBool("isAttacking"))
         {
