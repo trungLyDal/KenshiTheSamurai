@@ -7,8 +7,8 @@ public class EnemyHealth : MonoBehaviour
     
     private int currentHealth;
     private Animator animator;
-    private Rigidbody2D rb; // <-- ADD THIS LINE
-    private bool isDead = false;
+    private Rigidbody2D rb; 
+    public bool isDead = false;
 
     void Start()
     {
@@ -50,7 +50,11 @@ public class EnemyHealth : MonoBehaviour
         
         // Now it's safe to disable the collider
         GetComponent<Collider2D>().enabled = false;
-        
+        var aiScript = GetComponent<EnemyPatrol>();
+        if (aiScript != null)
+        {
+            aiScript.enabled = false;
+        }
         // (Optional) Disable the patrol script so it stops thinking
         // GetComponent<EnemyPatrol>().enabled = false;
         
