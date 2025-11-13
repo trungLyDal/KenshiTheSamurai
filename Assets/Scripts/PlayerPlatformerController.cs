@@ -67,7 +67,7 @@ public class PlayerPlatformerController : MonoBehaviour
         Flip();
         jumpBufferCounter -= Time.deltaTime;
 
-        var dashInput = Input.GetKeyDown(KeyCode.LeftShift); 
+        var dashInput = Input.GetKeyDown(KeyCode.Q); 
 
         if (dashInput && canDash && !isDashing)
         {
